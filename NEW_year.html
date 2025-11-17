@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <title>नयाँ वर्ष 2083 को प्रतीक्षा</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      overflow: hidden;
+      background: linear-gradient(45deg, #ff512f, #dd2476);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      background-size: 400% 400%;
+      animation: bgMove 20s ease infinite;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 400% 400%; }
+    }
+
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 25px 40px;
+      border-radius: 15px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 40px;
+      font-weight: 800;
+    }
+
+    #bsdate, #addate {
+      font-size: 22px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    #timer {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 20px;
+    }
+
+    #fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+      z-index: 1;
+    }
+
+    .gif-box img {
+      width: 200px;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="container">
+  <h1>🎉 नयाँ वर्ष 2083 को प्रतीक्षा 🎉</h1>
+  <div id="bsdate">लोड हुँदैछ...</div>
+  <div id="addate"></div>
+  <div id="timer"></div>
+
+  <div class="gif-box">
+    <img src="https://media.tenor.com/vzWff_YcVxIAAAAC/happy-new-year-2023.gif" alt="Happy New Year GIF">
+  </div>
+</div>
+
+<audio id="newyearMusic">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-happy-party-horn-580.mp3">
+</audio>
+
+<script>
+/* ------------------------------
+   SHOW EXACT NEPALI TIME (NO API)
+--------------------------------*/
+function getNepaliTime() {
+  const now = new Date();
+
+  // Convert to Nepal Time
+  const nepaliTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kathmandu" }));
+
+  let hours = nepaliTime.getHours().toString().padStart(2, "0");
+  let minutes = nepaliTime.getMinutes().toString().padStart(2, "0");
+  let seconds = nepaliTime.getSeconds().toString().padStart(2, "0");
+
+  let year = nepaliTime.getFullYear();
+  let month = (nepaliTime.getMonth() + 1).toString().padStart(2, "0");
+  let day = nepaliTime.getDate().toString().padStart(2, "0");
+
+  // Nepali Time
+  document.getElementById("bsdate").innerHTML =
+    `⏰ नेपाल समय: ${hours}:${minutes}:${seconds}`;
+
+  // Today's AD Date
+  document.getElementById("addate").innerHTML =
+    `📆 आजको Gregorian Date: ${year}-${month}-${day}`;
+
+  setTimeout(getNepaliTime, 1000);
+}
+
+/* ------------------------------
+    COUNTDOWN TO NEPALI NEW YEAR
+--------------------------------*/
+
+// Baisakh 1, 2083 = April 14, 2026
+function countdownNepaliNewYear() {
+  let now = new Date();
+  let newYear = new Date("2026-04-14T00:00:00");
+
+  let diff = newYear - now;
+
+  if (diff <= 0) {
+    startFireworks();
+    playMusic();
+    document.getElementById("timer").innerHTML = "🎉 नयाँ वर्षको शुभकामना! 🎉";
+    return;
+  }
+
+  let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById("timer").innerHTML =
+    `${days} दिन : ${hours} घण्टा : ${minutes} मिनेट : ${seconds} सेकेन्ड बाँकी`;
+
+  setTimeout(countdownNepaliNewYear, 1000);
+}
+
+/* ------------------------------
+          FIREWORKS
+--------------------------------*/
+function playMusic() {
+  document.getElementById("newyearMusic").play();
+}
+
+function startFireworks() {
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+  canvas.style.display = "block";
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  let particles = [];
+
+  function randomColor() {
+    return "hsl(" + Math.random() * 360 + ",100%,50%)";
+  }
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.radius = Math.random() * 4 + 2;
+      this.color = randomColor();
+      this.speedX = Math.random() * 4 - 2;
+      this.speedY = Math.random() * 4 - 2;
+      this.alpha = 1;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.alpha -= 0.02;
+    }
+    draw() {
+      ctx.globalAlpha = this.alpha;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  }
+
+  function explode() {
+    let x = Math.random() * canvas.width;
+    let y = Math.random() * canvas.height / 2;
+    for (let i = 0; i < 40; i++) particles.push(new Particle(x, y));
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.alpha > 0);
+    particles.forEach(p => { p.update(); p.draw(); });
+
+    if (Math.random() < 0.08) explode();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+/* ------------------------------
+     START FUNCTIONS
+--------------------------------*/
+getNepaliTime();
+countdownNepaliNewYear();
+</script>
+
+</body>
+</html>
